@@ -1,4 +1,5 @@
 # Single variable linear regression
+# This has 2 models. One salary model, the second student model
 
 import numpy as np
 import pandas as pd
@@ -6,7 +7,6 @@ import matplotlib.pyplot as plt
 import statements as st
 
 def plotGraph(x,y,title,xlabel,ylabel):
-
     plt.plot(x,y)
     plt.title(title)
     plt.xlabel(xlabel)
@@ -22,7 +22,6 @@ def hypothesis(x,w,b):
 
 def computeCost(x,y,w,b):
     m = x.shape[0]
-
     predictions = hypothesis(x, w, b)
     cost = 1/(2*m)*(np.sum((predictions-y)**2))
     return cost
@@ -56,7 +55,6 @@ def gradientDecent(x,y,w,b,alpha,iterations):
 
 
 def readData():
-
     userOption = input(st.user_question_one)
     
     if int(userOption) == 1:
@@ -97,11 +95,12 @@ alpha = 0.0001
 iterations = 100000
 
 x,y,userOption = readData()
+
 x_mean, x_std = get_stats(x)
 y_mean, y_std = get_stats(y)
-
 x_train = normalize(x, x_mean, x_std)
 y_train = normalize(y, y_mean, y_std)
+
 final_w, final_b, j_list, w_list, i_list = gradientDecent(x_train, y_train, init_w, init_b, alpha, iterations)
 
 
