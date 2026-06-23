@@ -4,20 +4,16 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def plotGraph(x,y,title,xlabel,ylabel,type="scatter"):
-    if type == "scatter":
-        plt.scatter(x,y)
+def plotGraph(x,y,title,xlabel,ylabel):
 
-    if type == "plot":
-        plt.plot(x,y)
-
+    plt.plot(x,y)
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.show()
 
 
-def hypothesis(x,y,w,b):
+def hypothesis(x,w,b):
     """
     This function returns the hypothesis of the model
     for linear regression: y = wx + b
@@ -28,32 +24,38 @@ def hypothesis(x,y,w,b):
 
 def computeCost(x,y,w,b):
     m = x.shape[0]
-    cost = 1/(2*m)*(np.sum((hypothesis(x,y,w,b)-y)**2))
+
+    predictions = hypothesis(x, w, b)
+    cost = 1/(2*m)*(np.sum((predictions-y)**2))
     return cost
 
 
 def calculateGradient(x,y,w,b):
     m = x.shape[0]
-    error = hypothesis(x,y,w,b) - y
+    error = hypothesis(x,w,b) - y
     dj_dw = (np.sum(error*x))/m
     dj_db = (np.sum(error))/m
     return dj_dw, dj_db
 
-import copy
-def gradientDecent(x,y,w_in,b,alpha,iterations):
 
+def gradientDecent(x,y,w,b,alpha,iterations):
     j_list = []
+    i_list = []
     w_list = []
-    w = copy.deepcopy(w_in)
 
     for i in range(iterations):
         dj_dw, dj_db = calculateGradient(x,y,w,b)
         w = w - alpha*dj_dw
         b = b - alpha*dj_db
 
-        cost = computeCost(x,y,w,b)
+        newCost = computeCost(x,y,w,b)
+            
         w_list.append(w)
-        j_list.append(cost)
+        j_list.append(newCost)
+        i_list.append(i)
+
+    plotGraph(i_list, j_list, "Cost Versus Iterations", "Number of iterations", "Cost")
+    plotGraph(w_list, j_list, "Cost Versus W", "W", "Cost")
 
     return w,b,j_list,w_list
 
@@ -73,16 +75,18 @@ def normalize(data, mean, std):
     return (data - mean) / std
 
 
-def plotFinalGraph(x,y,w,b):
+def plotFinalGraphWithPoints(x,y,w,b,x_point, y_point):
     p = w*x + b
-    plt.plot(x, p, c="b")
+    plt.plot(x, p, c="r")
+    plt.scatter(x_point, y_point, marker="*", c="b")
     plt.scatter(x, y, marker="x", c="r")
     plt.show()
 
+
 init_w = 0
 init_b = 0
-alpha = 0.01
-iterations = 10000
+alpha = 0.0001
+iterations = 100000
 
 x,y = readData()
 x_mean, x_std = get_stats(x)
@@ -91,6 +95,7 @@ y_mean, y_std = get_stats(y)
 x_train = normalize(x, x_mean, x_std)
 y_train = normalize(y, y_mean, y_std)
 final_w, final_b, j_list, w_list = gradientDecent(x_train, y_train, init_w, init_b, alpha, iterations)
+
 
 try:
     exp = float(input("Enter the years of experience: "))
@@ -101,3 +106,4 @@ else:
     salaryPredictionNorm = final_w * normX + final_b
     salaryPredictionFinal = (salaryPredictionNorm * y_std) + y_mean
     print("The salary will be : ", int(salaryPredictionFinal))
+    plotFinalGraphWithPoints(x_train, y_train, final_w, final_b, normX, salaryPredictionNorm)
